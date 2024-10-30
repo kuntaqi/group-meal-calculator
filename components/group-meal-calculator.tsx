@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import {useState, useEffect, useRef} from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -8,18 +8,46 @@ import { Switch } from "@/components/ui/switch"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Moon, Sun, Plus, Trash2, Download, Camera } from 'lucide-react'
+import html2canvas from "html2canvas";
+
+interface Item {
+  name: string,
+  price: number,
+  quantity: number,
+  total: number
+}
+
+interface User {
+  name: string,
+  items: Item[],
+}
+
+interface Discount {
+  type: "percentage" | "amount",
+  value: number
+}
+
+interface Result {
+  name: string,
+  items: Item[],
+  subtotal: number,
+  discount: number,
+  shipping: number,
+  share: number
+}
 
 export function GroupMealCalculatorComponent() {
-  const [darkMode, setDarkMode] = useState(false)
-  const [users, setUsers] = useState([{ name: '', items: [{ name: '', price: 0, quantity: 1 }] }])
-  const [discount, setDiscount] = useState({ type: 'percentage', value: 0 })
-  const [shipping, setShipping] = useState(0)
-  const [results, setResults] = useState([])
-  const [currency, setCurrency] = useState('IDR')
-  const [billPayer, setBillPayer] = useState('')
-  const [date, setDate] = useState('')
-  const [restaurantName, setRestaurantName] = useState('')
-  const [isCalculating, setIsCalculating] = useState(false)
+  const [darkMode, setDarkMode] = useState<boolean>(false)
+  const [users, setUsers] = useState<User[]>([{ name: '', items: [{ name: '', price: 0, quantity: 1, total: 0 }] }])
+  const [discount, setDiscount] = useState<Discount>({ type: 'percentage', value: 0 })
+  const [shipping, setShipping] = useState<number>(0)
+  const [results, setResults] = useState<Result[]>([])
+  const [currency, setCurrency] = useState<string>('IDR')
+  const [billPayer, setBillPayer] = useState<string>('')
+  const [date, setDate] = useState<string>('')
+  const [restaurantName, setRestaurantName] = useState<string>('')
+  const [isCalculating, setIsCalculating] = useState<boolean>(false)
+  const resultCardRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (darkMode) {
@@ -30,36 +58,40 @@ export function GroupMealCalculatorComponent() {
   }, [darkMode])
 
   const addUser = () => {
-    setUsers([...users, { name: '', items: [{ name: '', price: 0, quantity: 1 }] }])
+    setUsers([...users, { name: '', items: [{ name: '', price: 0, quantity: 1, total: 0 }] }])
   }
 
-  const addItem = ({userIndex}: { userIndex: number }) => {
+  const addItem = (userIndex: number) => {
     const newUsers = [...users]
-    newUsers[userIndex].items.push({ name: '', price: 0, quantity: 1 })
+    newUsers[userIndex].items.push({ name: '', price: 0, quantity: 1, total: 0 })
     setUsers(newUsers)
   }
 
-  const removeItem = ({userIndex, itemIndex}: { userIndex: number, itemIndex: number }) => {
+  const removeItem = (userIndex: number, itemIndex: number) => {
     const newUsers = [...users]
     newUsers[userIndex].items.splice(itemIndex, 1)
     setUsers(newUsers)
   }
 
-  const handleInputChange = ({userIndex, itemIndex, field, value}: {
-    userIndex: number,
-    itemIndex: number,
-    field: string,
-    value: string
-  }) => {
+  const handleInputChange = (userIndex: number, itemIndex: number, field: keyof Item, value: string | number) => {
     const newUsers = [...users]
+
     if (field === 'name' && itemIndex === -1) {
-      newUsers[userIndex].name = value
+      newUsers[userIndex].name = value as string
     } else {
-      newUsers[userIndex].items[itemIndex][field] = field === 'price' || field === 'quantity' ? parseFloat(value) || 0 : value
-      if (field === 'quantity' && newUsers[userIndex].items[itemIndex][field] < 1) {
-        newUsers[userIndex].items[itemIndex][field] = 1
+      const item = newUsers[userIndex].items[itemIndex]
+
+      if (field === 'price' || field === 'quantity') {
+        item[field] = typeof value === 'number' ? value : parseFloat(value as string) || 0
+      } else {
+        item[field as 'name'] = value as string
+      }
+
+      if (field === 'quantity' && item.quantity < 1) {
+        item.quantity = 1
       }
     }
+
     setUsers(newUsers)
   }
 
@@ -67,18 +99,17 @@ export function GroupMealCalculatorComponent() {
     setIsCalculating(true)
     // Simulate a delay to show the loading state (remove this in a real app)
     setTimeout(() => {
-      const totalBeforeDiscount = users.reduce((total, user) => 
+      const totalBeforeDiscount = users.reduce((total, user) =>
         total + user.items.reduce((userTotal, item) => userTotal + (item.price * item.quantity), 0), 0)
-      
-      const discountAmount = discount.type === 'percentage' 
+
+      const discountAmount = discount.type === 'percentage'
         ? totalBeforeDiscount * (discount.value / 100)
         : discount.value
 
       const totalAfterDiscount = totalBeforeDiscount - discountAmount
-      const totalWithShipping = totalAfterDiscount + shipping
       const shippingPerPerson = shipping / users.length
 
-      const shares = users.map(user => {
+      const shares: Result[] = users.map(user => {
         const userItems = user.items.map(item => ({
           name: item.name,
           price: item.price,
@@ -108,18 +139,18 @@ export function GroupMealCalculatorComponent() {
   }
 
   const exportCSV = () => {
-    const csvContent = "data:text/csv;charset=utf-8," 
+    const csvContent = "data:text/csv;charset=utf-8,"
       + `Bill Payer: ${billPayer}\n`
       + `Date: ${date}\n`
       + `Restaurant: ${restaurantName}\n\n`
       + "Name,Item,Price,Quantity,Total,Subtotal,Discount,Shipping,Share\n"
-      + results.flatMap(r => 
-          r.items.map((item, index) => 
+      + results.flatMap(r =>
+          r.items.map((item, index) =>
             `${index === 0 ? r.name : ''},${item.name},${formatNumberForCSV(item.price)},${item.quantity},${formatNumberForCSV(item.total)}` +
             `${index === 0 ? `,${formatNumberForCSV(r.subtotal)},${formatNumberForCSV(r.discount)},${formatNumberForCSV(r.shipping)},${formatNumberForCSV(r.share)}` : ',,,'}`
           ).join("\n")
         ).join("\n")
-    
+
     const encodedUri = encodeURI(csvContent)
     const link = document.createElement("a")
     link.setAttribute("href", encodedUri)
@@ -129,11 +160,19 @@ export function GroupMealCalculatorComponent() {
     document.body.removeChild(link)
   }
 
-  const saveAsImage = () => {
-    alert("This feature would capture a screenshot of the results and save it as an image.")
+  const saveAsImage = async () => {
+    if (resultCardRef.current) {
+      const canvas = await html2canvas(resultCardRef.current)
+      const image = canvas.toDataURL('image/png')
+
+      const link = document.createElement('a')
+      link.href = image
+      link.download = 'result.png'
+      link.click()
+    }
   }
 
-  const formatCurrency = (amount) => {
+  const formatCurrency = (amount: number) => {
     const roundedAmount = Math.ceil(amount)
     if (currency === 'IDR') {
       return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(roundedAmount)
@@ -150,7 +189,7 @@ export function GroupMealCalculatorComponent() {
             <CardTitle className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
               <span>Group Meal Calculator</span>
               <div className="flex items-center space-x-4">
-                <Select value={currency} onValueChange={setCurrency}>
+                <Select value={currency} onValueChange={(value: string) => setCurrency(value)}>
                   <SelectTrigger className="w-[120px]">
                     <SelectValue placeholder="Currency" />
                   </SelectTrigger>
@@ -206,12 +245,7 @@ export function GroupMealCalculatorComponent() {
                   <Input
                     id={`user-${userIndex}`}
                     value={user.name}
-                    onChange={(e) => handleInputChange({
-                      userIndex: userIndex,
-                      itemIndex: -1,
-                      field: 'name',
-                      value: e.target.value
-                    })}
+                    onChange={(e) => handleInputChange(userIndex, -1, 'name', e.target.value)}
                     placeholder="Enter user name"
                   />
                 </div>
@@ -220,49 +254,31 @@ export function GroupMealCalculatorComponent() {
                     <Input
                       className="w-full sm:w-1/3"
                       value={item.name}
-                      onChange={(e) => handleInputChange({
-                        userIndex: userIndex,
-                        itemIndex: itemIndex,
-                        field: 'name',
-                        value: e.target.value
-                      })}
+                      onChange={(e) => handleInputChange(userIndex, itemIndex, 'name', e.target.value)}
                       placeholder="Item name"
                     />
                     <Input
                       className="w-full sm:w-1/4"
                       type="number"
                       value={item.price}
-                      onChange={(e) => handleInputChange({
-                        userIndex: userIndex,
-                        itemIndex: itemIndex,
-                        field: 'price',
-                        value: e.target.value
-                      })}
+                      onChange={(e) => handleInputChange(userIndex, itemIndex, 'price', e.target.value)}
                       placeholder={`Price (${currency})`}
                     />
                     <Input
                       className="w-full sm:w-1/6"
                       type="number"
                       value={item.quantity}
-                      onChange={(e) => handleInputChange({
-                        userIndex: userIndex,
-                        itemIndex: itemIndex,
-                        field: 'quantity',
-                        value: e.target.value
-                      })}
+                      onChange={(e) => handleInputChange(userIndex, itemIndex, 'quantity', e.target.value)}
                       placeholder="Qty"
                       min="1"
                     />
-                    <Button variant="outline" size="icon" onClick={() => removeItem({
-                      userIndex: userIndex,
-                      itemIndex: itemIndex
-                    })}>
+                    <Button variant="outline" size="icon" onClick={() => removeItem(userIndex, itemIndex)}>
                       <Trash2 className="h-4 w-4" />
                       <span className="sr-only">Remove item</span>
                     </Button>
                   </div>
                 ))}
-                <Button onClick={() => addItem({userIndex: userIndex})} className="mt-2">
+                <Button onClick={() => addItem(userIndex)} className="mt-2">
                   <Plus className="h-4 w-4 mr-2" /> Add Item
                 </Button>
               </div>
@@ -275,7 +291,7 @@ export function GroupMealCalculatorComponent() {
                 <Label htmlFor="discount-type" className="min-w-[100px]">Discount Type</Label>
                 <Select
                   value={discount.type}
-                  onValueChange={(value) => setDiscount({ ...discount, type: value })}
+                  onValueChange={(value) => setDiscount({ ...discount, type: value as Discount['type'] })}
                 >
                   <SelectTrigger id="discount-type" className="w-full sm:w-[120px]">
                     <SelectValue placeholder="Select type" />
@@ -325,7 +341,7 @@ export function GroupMealCalculatorComponent() {
         </Card>
 
         {results.length > 0 && (
-          <Card>
+          <Card ref={resultCardRef} className="result-card">
             <CardHeader>
               <CardTitle>Results</CardTitle>
             </CardHeader>
@@ -366,7 +382,7 @@ export function GroupMealCalculatorComponent() {
         )}
       </div>
       <footer className="mt-8 py-4 text-center text-sm text-muted-foreground">
-        Created by Ahmad Taqiyudin
+        Made with 🧠 by <a href="https://www.linkedin.com/in/taqiyudin/" target="_blank">Ahmad Taqiyudin</a> ®️ 2024
       </footer>
     </div>
   )
