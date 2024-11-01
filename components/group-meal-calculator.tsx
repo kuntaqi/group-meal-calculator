@@ -281,11 +281,12 @@ export function GroupMealCalculatorComponent() {
                           <div className="relative w-full sm:w-1/4">
                             <span className="absolute left-3 top-1/2 transform -translate-y-1/2">{getCurrencyPrefix(currency)}</span>
                             <Input
-                                className="pl-8"
+                                className="pl-9"
                                 type="number"
+                                step="1000"
                                 value={item.price === 0 ? '' : item.price}
                                 onChange={(e) => handleInputChange(userIndex, itemIndex, 'price', e.target.value)}
-                                placeholder=" 0"/>
+                                placeholder="0"/>
                           </div>
                           <Input
                               className="w-full sm:w-1/6"
@@ -332,12 +333,12 @@ export function GroupMealCalculatorComponent() {
                   <div className="relative w-full sm:w-auto">
                     <Input
                         id="discount-value"
-                        className={`pl-8 ${discount.type === 'amount' ? 'pr-8' : ''}`}
+                        className={`pl-9 ${discount.type === 'amount' ? 'pr-9' : ''}`}
                         type="number"
-                        step={discount.type === 'percentage' ? '0.01' : '1'}
+                        step={discount.type === 'percentage' ? '0.01' : '1000'}
                         value={discount.value === 0 ? '' : discount.value}
                         onChange={(e) => setDiscount({...discount, value: parseFloat(e.target.value) || 0})}
-                        placeholder={discount.type === 'percentage' ? 'Discount %' : `Discount Amount`}
+                        placeholder={discount.type === 'percentage' ? 'Discount %' : `0`}
                     />
                     {discount.type === 'amount' && (
                         <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
@@ -360,11 +361,12 @@ export function GroupMealCalculatorComponent() {
                     </span>
                     <Input
                         id="shipping"
-                        className="pl-8" // Padding for the prefix
+                        className="pl-9" // Padding for the prefix
                         type="number"
+                        step="1000"
                         value={shipping === 0 ? '' : shipping}
                         onChange={(e) => setShipping(parseFloat(e.target.value) || 0)}
-                        placeholder=" 0"
+                        placeholder="0"
                     />
                   </div>
                 </div>

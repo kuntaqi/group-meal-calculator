@@ -24,45 +24,51 @@ Welcome to the Group Meal Calculator! This web application helps you calculate a
 1. **Access the Application**
     - Open your web browser and navigate to the deployed application URL: [Group Meal Calculator](https://group-meal-calculators.vercel.app/).
 
+
 2. **Add a User**
     - Click on the **Add User** button to create a new entry.
     - Enter the user's name in the corresponding field.
 
-   ![Add User Screenshot](path/to/add-user-screenshot.png)
+   ![Add User Screenshot](screenshots/add%20user.png)
+
 
 3. **Input Meal Items**
     - For each user, you can add meal items:
         - Click on **Add Item** under the user’s section.
         - Fill in the item name, price, and quantity.
 
-   ![Meal Items Screenshot](path/to/meal-items-screenshot.png)
+   ![Meal Items Screenshot](screenshots/add%20item.png)
+
 
 4. **Set Discounts and Shipping Costs**
     - Below the user entries, you can add a discount type (percentage or fixed amount) and the shipping cost:
         - Fill in the respective fields as needed.
 
-   ![Discounts and Shipping Screenshot](path/to/discounts-and-shipping-screenshot.png)
+   ![Discounts and Shipping Screenshot](screenshots/img.png)
+
 
 5. **Calculate Shares**
     - Once you have entered all necessary information, click on the **Calculate Shares** button.
     - This will show the calculated shares for each user based on the meal items, totals, discounts, and shipping costs.
 
-   ![Calculate Shares Screenshot](path/to/calculate-shares-screenshot.png)
+   ![Calculate Shares Screenshot](screenshots/img_1.png)
+
 
 6. **View Results**
     - The app will display each user’s meal shares, including details like subtotal, discount taken, shipping, and total share.
 
-   ![Results Display Screenshot](path/to/results-display-screenshot.png)
+   ![Results Display Screenshot](screenshots/img_2.png)
+
 
 7. **Export Your Results**
     - You can download the shares as a CSV file for easy sharing or save the results as an image:
         - Click on the **Export CSV** or **Save as Image** button.
 
-   ![Export Screenshot](path/to/export-screenshot.png)
+   ![Export Screenshot](screenshots/img_3.png)
 
 ## Screenshots
 
-Insert your screenshots in corresponding sections above to provide visual guidance.
+![First Screenshot](screenshots/img_4.png)
 
 ## Frequently Asked Questions (FAQs)
 
