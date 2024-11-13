@@ -48,6 +48,7 @@ export function GroupMealCalculatorComponent() {
   const [restaurantName, setRestaurantName] = useState<string>('')
   const [isCalculating, setIsCalculating] = useState<boolean>(false)
   const resultCardRef = useRef<HTMLDivElement>(null)
+  const [grandTotal, setGrandTotal] = useState<number>(0)
 
   useEffect(() => {
     if (darkMode) {
@@ -129,7 +130,13 @@ export function GroupMealCalculatorComponent() {
         }
       })
 
+      let result = 0;
+      shares.forEach( number => {
+        result += number.share
+      })
+
       setResults(shares)
+      setGrandTotal(result)
       setIsCalculating(false)
     }, 500) // Simulated delay of 500ms
   }
@@ -404,6 +411,7 @@ export function GroupMealCalculatorComponent() {
                     <p><strong>Bill Payer:</strong> {billPayer}</p>
                     <p><strong>Date:</strong> {date}</p>
                     <p><strong>Restaurant:</strong> {restaurantName}</p>
+                    <p><strong>Grand Total:</strong> {formatCurrency(grandTotal)}</p>
                   </div>
                   {results.map((result, index) => (
                       <div key={index} className="mb-6 p-4 border rounded-lg">
