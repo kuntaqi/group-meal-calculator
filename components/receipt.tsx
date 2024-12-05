@@ -1,30 +1,7 @@
 import {formatCurrency} from "@/utils/utils";
+import {ReceiptProps} from "@/types/types";
 
-interface Item {
-    name: string,
-    price: number,
-    quantity: number,
-    total: number
-}
-
-interface Result {
-    name: string,
-    items: Item[],
-    subtotal: number,
-    discount: number,
-    shipping: number,
-    share: number
-}
-
-interface ReceiptProps {
-    billPayer: string
-    date: string
-    restaurantName: string
-    results: Result[]
-    currency: string
-}
-
-export function Receipt({ billPayer, date, restaurantName, results, currency }: ReceiptProps) {
+export function Receipt({billPayer, date, restaurantName, results, currency}: ReceiptProps) {
     const total = results.reduce((sum, result) => sum + result.share, 0)
 
     return (

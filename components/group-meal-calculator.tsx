@@ -1,43 +1,18 @@
 'use client'
 
-import {useState, useEffect, useRef} from 'react'
+import {Card, CardContent, CardFooter, CardHeader, CardTitle} from "@/components/ui/card"
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select"
+import {Moon, Sun, Plus, Trash2, Download, Camera} from 'lucide-react'
+import {Discount, Item, Result, User} from "@/types/types";
+import {useState, useEffect} from 'react'
+import {formatCurrency} from "@/utils/utils";
 import {Button} from "@/components/ui/button"
 import {Input} from "@/components/ui/input"
 import {Label} from "@/components/ui/label"
 import {Switch} from "@/components/ui/switch"
-import {Card, CardContent, CardFooter, CardHeader, CardTitle} from "@/components/ui/card"
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select"
-import {Moon, Sun, Plus, Trash2, Download, Camera} from 'lucide-react'
-import html2canvas from "html2canvas";
-import {formatCurrency} from "@/utils/utils";
-import ReactDOMServer from "react-dom/server";
 import {Receipt} from "@/components/receipt";
-
-interface Item {
-    name: string,
-    price: number,
-    quantity: number,
-    total: number
-}
-
-interface User {
-    name: string,
-    items: Item[]
-}
-
-interface Discount {
-    type: "percentage" | "amount",
-    value: number
-}
-
-interface Result {
-    name: string,
-    items: Item[],
-    subtotal: number,
-    discount: number,
-    shipping: number,
-    share: number
-}
+import html2canvas from "html2canvas";
+import ReactDOMServer from "react-dom/server";
 
 export function GroupMealCalculatorComponent() {
     const [darkMode, setDarkMode] = useState<boolean>(false)
@@ -50,7 +25,6 @@ export function GroupMealCalculatorComponent() {
     const [date, setDate] = useState<string>('')
     const [restaurantName, setRestaurantName] = useState<string>('')
     const [isCalculating, setIsCalculating] = useState<boolean>(false)
-    const resultCardRef = useRef<HTMLDivElement>(null)
     const [grandTotal, setGrandTotal] = useState<number>(0)
 
     useEffect(() => {
@@ -187,7 +161,7 @@ export function GroupMealCalculatorComponent() {
         container.style.top = '-9999px';
         document.body.appendChild(container);
 
-        const canvas = await html2canvas(container, { scale: 2 });
+        const canvas = await html2canvas(container, {scale: 2});
         document.body.removeChild(container);
 
         const link = document.createElement('a')
@@ -355,16 +329,14 @@ export function GroupMealCalculatorComponent() {
                                         placeholder={discount.type === 'percentage' ? 'Discount %' : `0`}
                                     />
                                     {discount.type === 'amount' && (
-                                        <span
-                                            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
-                          {getCurrencyPrefix(currency)}
-                        </span>
+                                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                                            {getCurrencyPrefix(currency)}
+                                        </span>
                                     )}
                                     {discount.type === 'percentage' && (
-                                        <span
-                                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">
-                          %
-                        </span>
+                                        <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                                            %
+                                        </span>
                                     )}
                                 </div>
                             </div>
@@ -372,9 +344,9 @@ export function GroupMealCalculatorComponent() {
                                 className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
                                 <Label htmlFor="shipping" className="min-w-[100px]">Shipping Cost</Label>
                                 <div className="relative w-full sm:w-auto">
-                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
-                      {getCurrencyPrefix(currency)}
-                    </span>
+                                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                                        {getCurrencyPrefix(currency)}
+                                    </span>
                                     <Input
                                         id="shipping"
                                         className="pl-9" // Padding for the prefix
@@ -411,7 +383,7 @@ export function GroupMealCalculatorComponent() {
                 </Card>
 
                 {results.length > 0 && (
-                    <Card ref={resultCardRef} className="result-card">
+                    <Card className="result-card">
                         <CardHeader>
                             <CardTitle>Results</CardTitle>
                         </CardHeader>
