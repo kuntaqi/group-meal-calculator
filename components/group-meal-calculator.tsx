@@ -117,9 +117,14 @@ export function GroupMealCalculatorComponent() {
         const totalBeforeDiscount = users.reduce((total, user) =>
             total + user.items.reduce((userTotal, item) => userTotal + (item.price * item.quantity), 0), 0)
 
+        if (totalBeforeDiscount <= 0){
+            toast.error("Add at least one item with price more than 0 before calculating")
+            return;
+        }
+
         const discountAmount = discount.type === 'percentage'
             ? totalBeforeDiscount * (discount.value / 100)
-            : discount.value
+            : Math.min(discount.value, totalBeforeDiscount)
 
         const totalAfterDiscount = totalBeforeDiscount - discountAmount
         const shippingPerPerson = shipping / users.length
