@@ -1,8 +1,10 @@
-// components/ByItemMode.tsx
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Plus, Trash2, X } from 'lucide-react'
+import { Plus, Trash2, Upload, X } from 'lucide-react'
 import { AssignItemModal } from './AssignItemModal'
+import { extractOrderItems } from "@/utils/extractOrderItems";
+import { useState } from "react";
+import { toast } from "react-hot-toast";
 
 interface ItemByItemMode {
 	id: string
@@ -48,6 +50,7 @@ interface ByItemModeProps {
 	getMemberSubtotal: (member: MemberByItem) => number
 	formatCurrency: (amount: number) => string
 	getCurrencyPrefix: (currency: string) => string
+	onImportExtractedItems: (parsedItems: { name: string; qty: number; price: number }[]) => void;
 }
 
 export function ByItemMode(props: ByItemModeProps) {
@@ -79,16 +82,61 @@ export function ByItemMode(props: ByItemModeProps) {
 		getCurrencyPrefix
 	} = props
 
+	const [loadingImport, setLoadingImport] = useState(false);
+
+	async function handleImportReceipt(e: React.ChangeEvent<HTMLInputElement>) {
+		const file = e.target.files?.[0];
+		if (!file) return;
+
+		if (!file.type.startsWith("image/")) {
+			toast.error("❌ Only image files (JPG, PNG, etc.) are supported.");
+			e.target.value = "";
+			return;
+		}
+
+		setLoadingImport(true);
+		try {
+			const result = await extractOrderItems(file);
+			if (result.items.length === 0) {
+				toast.error("No items detected in the receipt.");
+			} else {
+				props.onImportExtractedItems(result.items);
+				toast.success(`✅ Imported ${result.items.length} items from ${result.platform.toUpperCase()} receipt`);
+			}
+		} catch (err) {
+			console.error(err);
+			toast.error("Failed to import receipt. Please try again.");
+		}
+		setLoadingImport(false);
+		e.target.value = "";
+	}
+
 	return (
 		<>
 			{/* Step 1: Add Items */}
 			<div className="mb-6">
-				<div className="flex justify-between items-center mb-4">
+				<div className="flex justify-between items-center mb-2">
 					<h3 className="text-lg font-semibold">Step 1: Add All Items</h3>
-					<Button onClick={onAddItem} className="bg-green-500 hover:bg-green-600">
-						<Plus className="h-4 w-4 mr-2"/> Add Item
-					</Button>
+					<div className="flex gap-2">
+						<Button onClick={onAddItem} className="bg-green-500 hover:bg-green-600">
+							<Plus className="h-4 w-4 mr-2"/> Add Item
+						</Button>
+						<label className="cursor-pointer bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1">
+							<Upload className="h-4 w-4" />
+							{loadingImport ? "Reading..." : "Import from Receipt"}
+							<input
+								type="file"
+								accept="image/*,application/pdf"
+								onChange={handleImportReceipt}
+								className="hidden"
+							/>
+						</label>
+					</div>
 				</div>
+				<p className="text-xs text-gray-500 italic mb-6">
+					⚠️ Import currently supports <strong>image files only</strong> (JPG, PNG, etc.).
+					PDF and other formats are not yet supported.
+				</p>
 
 				<div className="space-y-3">
 					{itemsByItem.map((item) => (

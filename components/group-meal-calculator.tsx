@@ -62,7 +62,6 @@ export function GroupMealCalculatorComponent() {
 		}
 	}
 
-	// Utility functions
 	const getCurrencyPrefix = (curr: string) => {
 		return curr === 'IDR' ? 'Rp' : '$'
 	}
@@ -71,10 +70,22 @@ export function GroupMealCalculatorComponent() {
 		return formatCurrency(amount, currency)
 	}
 
-	// By Item Mode Functions
 	const addItemByItem = () => {
 		setItemsByItem([ ...itemsByItem, { id: Date.now().toString(), name: '', price: 0, quantity: 1 } ])
 	}
+
+	const importExtractedItems = (parsedItems: { name: string; qty: number; price: number }[]) => {
+		console.log("📥 Importing extracted items:", parsedItems)
+		const mapped = parsedItems.map(i => ({
+			id: Date.now().toString() + Math.random(),
+			name: i.name,
+			price: i.price,
+			quantity: i.qty,
+		}))
+		setItemsByItem(mapped)
+		toast.success(`Imported ${ mapped.length } items from receipt`)
+	}
+
 
 	const removeItemByItem = (id: string) => {
 		setItemsByItem(itemsByItem.filter(item => item.id !== id))
@@ -205,7 +216,6 @@ export function GroupMealCalculatorComponent() {
 		)
 	}
 
-	// By User Mode Functions
 	const addUser = () => {
 		setUsers([ { name: '', items: [ { name: '', price: 0, quantity: 1, total: 0 } ] }, ...users ])
 	}
@@ -507,6 +517,7 @@ export function GroupMealCalculatorComponent() {
 								getMemberSubtotal={ getMemberSubtotal }
 								formatCurrency={ formatCurr }
 								getCurrencyPrefix={ getCurrencyPrefix }
+								onImportExtractedItems={ importExtractedItems }
 							/>
 						) }
 
@@ -543,12 +554,14 @@ export function GroupMealCalculatorComponent() {
 										placeholder={ discount.type === 'percentage' ? 'Discount %' : '0' }
 									/>
 									{ discount.type === 'amount' && (
-										<span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+										<span
+											className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
                       						{ getCurrencyPrefix(currency) }
                     					</span>
 									) }
 									{ discount.type === 'percentage' && (
-										<span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">%</span>
+										<span
+											className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">%</span>
 									) }
 								</div>
 							</div>
