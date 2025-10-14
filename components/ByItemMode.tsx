@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Plus, Trash2, Upload, X } from 'lucide-react'
+import { ChevronDown, ChevronUp, Plus, Trash2, Upload, X } from 'lucide-react'
 import { AssignItemModal } from './AssignItemModal'
 import { extractOrderItems } from "@/utils/extractOrderItems";
 import React, { useState } from "react";
@@ -83,6 +83,8 @@ export function ByItemMode(props: ByItemModeProps) {
 	} = props
 
 	const [ loadingImport, setLoadingImport ] = useState(false);
+	const [ showTips, setShowTips ] = useState(false);
+
 
 	async function handleImportReceipt(e: React.ChangeEvent<HTMLInputElement>) {
 		const file = e.target.files?.[ 0 ];
@@ -134,38 +136,56 @@ export function ByItemMode(props: ByItemModeProps) {
 						</label>
 					</div>
 				</div>
-				<div
-					className="bg-yellow-50 border border-yellow-300 text-yellow-800 px-4 py-3 rounded-xl text-sm space-y-2">
-					<p>
-						⚠️ <strong>Important:</strong> The import currently supports <strong>image files
-						only</strong> (JPG, PNG, etc.).
-					</p>
-					<p>
-						⚠️ Text recognition uses OCR and results <strong>may vary</strong> depending on image quality.
-					</p>
-					<ul className="list-disc list-inside text-xs text-yellow-900">
-						<li>Use bright lighting and clear focus.</li>
-						<li>Avoid cropping too close to the text or having glare.</li>
-						<li>Ensure all items, prices, and totals are visible.</li>
-						<li>Prefer screenshots instead of scanned or blurred photos.</li>
-						<li>Keep text horizontal (not rotated or slanted).</li>
-					</ul>
-					<p className="text-xs text-gray-600 italic">
-						🙏 If the system finds it hard to scan your image, we’re really sorry —
-						you might need to edit your items manually. Thank you for understanding ❤️
-					</p>
-					{/*<p className="pt-1 text-xs">*/ }
-					{/*	📹 Need help? Watch our{" "}*/ }
-					{/*	<a*/ }
-					{/*		href="/tutorials/receipt-import.mp4"*/ }
-					{/*		target="_blank"*/ }
-					{/*		rel="noopener noreferrer"*/ }
-					{/*		className="text-blue-700 underline hover:text-blue-900 font-medium"*/ }
-					{/*	>*/ }
-					{/*		quick tutorial*/ }
-					{/*	</a>{" "}*/ }
-					{/*	on how to capture clear and readable receipts.*/ }
-					{/*</p>*/ }
+				<div className="bg-yellow-50 border border-yellow-300 text-yellow-800 px-4 py-3 rounded-xl text-sm space-y-2">
+					<button
+						type="button"
+						onClick={() => setShowTips(!showTips)}
+						className="flex items-center justify-between w-full font-medium text-yellow-800 focus:outline-none"
+					>
+						<span>
+							⚠️ OCR accuracy notice
+						</span>
+						{showTips ? (
+							<ChevronUp size={18} className="text-yellow-700" />
+						) : (
+							<ChevronDown size={18} className="text-yellow-700" />
+						)}
+					</button>
+
+					{ showTips && (
+						<div className="space-y-2">
+							<p>
+								⚠️ <strong>Important:</strong> The import currently supports <strong>image files
+								only</strong> (JPG, PNG, etc.).
+							</p>
+							<p>
+								⚠️ Text recognition uses OCR and results <strong>may vary</strong> depending on image quality.
+							</p>
+							<ul className="list-disc list-inside text-xs text-yellow-900">
+								<li>Use bright lighting and clear focus.</li>
+								<li>Avoid cropping too close to the text or having glare.</li>
+								<li>Ensure all items, prices, and totals are visible.</li>
+								<li>Prefer screenshots instead of scanned or blurred photos.</li>
+								<li>Keep text horizontal (not rotated or slanted).</li>
+							</ul>
+							<p className="text-xs text-gray-600 italic">
+								🙏 If the system finds it hard to scan your image, we’re really sorry —
+								you might need to edit your items manually. Thank you for understanding ❤️
+							</p>
+							{/*<p className="pt-1 text-xs">*/ }
+							{/*	📹 Need help? Watch our{" "}*/ }
+							{/*	<a*/ }
+							{/*		href="/tutorials/receipt-import.mp4"*/ }
+							{/*		target="_blank"*/ }
+							{/*		rel="noopener noreferrer"*/ }
+							{/*		className="text-blue-700 underline hover:text-blue-900 font-medium"*/ }
+							{/*	>*/ }
+							{/*		quick tutorial*/ }
+							{/*	</a>{" "}*/ }
+							{/*	on how to capture clear and readable receipts.*/ }
+							{/*</p>*/ }
+						</div>
+					)}
 				</div>
 
 				<div className="space-y-3">
