@@ -9,4 +9,27 @@ export default defineConfig({
       "@": path.resolve(__dirname, "."),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes("node_modules")) {
+            if (id.includes("pdfjs-dist")) {
+              return "pdfjs";
+            }
+            if (id.includes("tesseract.js")) {
+              return "tesseract";
+            }
+            if (id.includes("html2canvas")) {
+              return "html2canvas";
+            }
+            if (id.includes("lucide-react")) {
+              return "lucide";
+            }
+            return "vendor"; // all other dependencies
+          }
+        },
+      },
+    },
+  },
 });
