@@ -15,13 +15,13 @@ async function initPdfJs() {
 }
 
 export async function extractTextFromPdf(file: File): Promise<string> {
+	const pdfjs = await initPdfJs();
+
+	if (!pdfjs) {
+		throw new Error('PDF.js not available');
+	}
+
 	try {
-		const pdfjs = await initPdfJs();
-
-		if (!pdfjs) {
-			throw new Error('PDF.js not available');
-		}
-
 		const arrayBuffer = await file.arrayBuffer();
 		const loadingTask = pdfjs.getDocument({ data: arrayBuffer });
 		const pdf = await loadingTask.promise;

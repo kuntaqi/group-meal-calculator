@@ -64,7 +64,7 @@ function parseGojekItems(text: string) {
 	let clean = text
 		.replace(/[\u200B-\u200D\uFEFF]/g, "")
 		.replace(/[“”‘’]/g, '"')
-		.replace(/©|¢|®/g, "@")
+		.replace(/[©¢®]/g, "@")
 		.replace(/\s+/g, " ")
 		.replace(/,/g, ".")
 		.replace(/rp/gi, "Rp")
@@ -74,7 +74,7 @@ function parseGojekItems(text: string) {
 	if (startIdx !== -1) clean = clean.substring(startIdx);
 
 	const regex =
-		/(\d+)\s+([A-Za-z0-9À-ÿ .,'()\/\-\+]+?)\s*@?\s*R[pP]\.?\s*([\d.]+)\s+R[pP]\.?\s*([\d.]+)/g;
+		/(\d+)\s+([A-Za-z0-9À-ÿ .,'()\/\-+]+?)\s*@?\s*R[pP]\.?\s*([\d.]+)\s+R[pP]\.?\s*([\d.]+)/g;
 
 	let match;
 	while ((match = regex.exec(clean)) !== null) {
@@ -98,7 +98,7 @@ function parseGojekItems(text: string) {
 function parseGrabItems(text: string): OrderItem[] {
 	text = text
 		.replace(/[\u200B-\u200D\uFEFF]/g, "")
-		.replace(/["'""''•@]/g, "")
+		.replace(/["'•@]/g, "")
 		.replace(/\s+/g, " ")
 		.replace(/(\d{1,3}[.,]\d{3})/g, "$1\n")
 		.replace(/(x\s+[A-Z])/g, "\n$1")
